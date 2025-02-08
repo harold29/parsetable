@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Table Extractor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        .container {
+            max-width: 500px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        input[type="file"] {
+            margin: 20px 0;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Extract Tables from PDFs</h2>
+        <p>Upload a PDF, and we'll extract the tables into a clean Excel/CSV file.</p>
+        <form id="uploadForm">
+            <input type="file" id="pdfFile" name="file" accept="application/pdf" required>
+            <button type="submit">Upload & Extract</button>
+        </form>
+        <p id="status"></p>
+        <a id="downloadLink" class="hidden" href="#">Download Extracted File</a>
+    </div>
+
+    <script>
+        document.getElementById("uploadForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+            let fileInput = document.getElementById("pdfFile");
+            let statusText = document.getElementById("status");
+            let downloadLink = document.getElementById("downloadLink");
+
+            if (fileInput.files.length === 0) {
+                statusText.innerText = "Please select a PDF file.";
+                return;
+            }
+
+            let formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+
+            statusText.innerText = "Processing...";
+
+            let response = await fetch("/upload", {
+                method: "POST",
+                body: formData
+            });
+
+            let result = await response.json();
+
+            if (result.success) {
+                statusText.innerText = "Extraction successful!";
+                downloadLink.href = result.download_url;
+                downloadLink.classList.remove("hidden");
+            } else {
+                statusText.innerText = "Error: " + result.error;
+            }
+        });
+    </script>
+</body>
+</html>
